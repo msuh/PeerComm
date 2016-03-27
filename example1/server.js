@@ -23,7 +23,6 @@ var Server = function() {
         //  Set the environment variables we need.
         self.ipaddress = "127.0.0.1";
         self.port      = 9000;
-        self.connectedPeers = {};
 
         console.log("IP address: ",self.ipaddress,":",self.port);
     };
@@ -70,9 +69,6 @@ var Server = function() {
         self.app.use(bodyParser.json());
         self.app.use(bodyParser.urlencoded({extended: true}));
         self.app.use(cookieParser());
-        // self.app.use(session({ 
-        //     secret: 'secret' 
-        // }));
         var routes = require('./routes/index');
         self.app.use('/', routes);
     };
@@ -84,7 +80,7 @@ var Server = function() {
      */
     self.initializeServer = function() {
         // self.createRoutes();
-        
+
         self.server = http.createServer(self.app);
         self.initializePeer();
     };
@@ -94,15 +90,24 @@ var Server = function() {
     		debug: true
 		}
 
-		self.app.use('/', ExpressPeerServer(self.server, options));
+		var peerServer = ExpressPeerServer(self.server, options);
+		self.app.use('/', peerServer);
 		self.server.on("connection",function(id){
-			self.connectedPeers[id] = 1;
-			// console.log("new connection: ",id);
-			// for(peerId in self.connectedPeers){
-			// }
+			//console.log(peerServer._clients);
+			// { peerjs:
+			//    { tctxwn784h146lxr:
+			//       { token: 'ssrstc8wichrxlke6krxav2t9',
+			//         ip: '127.0.0.1',
+			//         res: [Object],
+			//         socket: [Object] } } }
+
+			// console.log(peerServer._outstanding);
+
+			//this seems to be the indicator of the domain..?
+			// console.log(id.domain);
 		});
 
-		self.server.on('disconnect', function(id) { 
+		self.server.on('disconnect', function(id) {
 		});
     };
 
@@ -110,7 +115,7 @@ var Server = function() {
         mongoose.connect(connection_string);
         var db = mongoose.connection;
         db.on('error', console.error.bind(console, 'Mongoose connection error:'));
-    };  
+    };
 
     /**
      *  Initializes the sample application.
@@ -139,7 +144,7 @@ var Server = function() {
         });
     };
 
-}; 
+};
 
 
 

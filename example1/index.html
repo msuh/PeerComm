@@ -1,9 +1,9 @@
-<!DOCTYPE HTML> 
-<html lang="en"> 
+<!DOCTYPE HTML>
+<html lang="en">
 <head>
-<title>PeerJS chat demo</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
-<meta http-equiv="Content-Language" content="en-us"> 
+<title>Peer-to-peer communication </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Language" content="en-us">
 
 <!-- <link href="fancy.css" rel="stylesheet" type="text/css"> -->
 
@@ -17,7 +17,7 @@ var peer = new Peer({
   // Set API key for cloud server (you don't need this if you're running your
   // own.
   // key: 'x7fwx2kavpy6tj4i',
-  
+
   debug: 3, // Set highest debug level (log everything!).
   host: "localhost",
   port: 9000,
@@ -61,7 +61,29 @@ function connect(c) {
           return;
         });
     });
-  } 
+  }else if(c.label === 'server') {
+    //message from server on new connected peers on same page
+    c.on('data', function(data){
+      console.log("data: ",data);
+      forEach(data , function(d){
+        if (!connectedPeers[requestedPeer]) {
+          // Create a connection
+          var c = peer.connect(requestedPeer, {
+            label: 'data',
+            serialization: 'none',
+            metadata: {message: 'new connection!'}
+          });
+          connectedPeers[requestedPeer] = 1;
+          c.on('open', function() {
+            connect(c);
+          });
+          c.on('error', function(err) { alert(err); });
+        }
+      })
+
+    });
+
+  }
   connectedPeers[c.peer] = 1;
 }
 
@@ -70,7 +92,7 @@ $(document).ready(function() {
   $('#connect').click(function() {
     var requestedPeer = $('#rid').val();
     if (!connectedPeers[requestedPeer]) {
-      // Create 2 connections, one labelled chat and another labelled file.
+      // Create a connection
       var c = peer.connect(requestedPeer, {
         label: 'data',
         serialization: 'none',
@@ -91,7 +113,7 @@ $(document).ready(function() {
     });
   });
 
-  // Send a chat message to all active connections.
+  // Send a message to all active connections.
   $('#send').submit(function(e) {
     e.preventDefault();
     // For each active connection, send the message.
@@ -136,9 +158,9 @@ window.onunload = window.onbeforeunload = function(e) {
 };
 
 </script>
-</head> 
- 
-<body> 
+</head>
+
+<body>
 
   <div id="actions">
     Your PeerJS ID is <span id="pid"></span><br>
@@ -149,11 +171,11 @@ window.onunload = window.onbeforeunload = function(e) {
     </form>
     <!-- <button id="close">Close selected connections</button> -->
   </div>
-<!-- 
+<!--
   <div id="wrap"><div id="connections"><span class="filler">You have not yet
         made any connections.</span></div>
     <div class="clear"></div></div> -->
-  
+
   <div class="warning browser">
     <div class="important">Your browser version: <span id="browsers"></span><br>
   Currently <strong>Firefox 22+ and Google Chrome 26.0.1403.0 or above</strong> is required.</strong></div>For more up to date compatibility
@@ -164,5 +186,5 @@ NATs.
 
 <div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee"><strong>Connection status</strong>:<br></div>
 </div>
-</body> 
-</html> 
+</body>
+</html>
