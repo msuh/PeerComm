@@ -24,6 +24,8 @@ Open multiple index.html pages and try connecting using their IDs.
 Data structure for a message from server to peer through WebSocket as defined in PeerJs in github.com/peerjs/dist/peerjs:
 
 
+Edit: using 'OFFER' does not form a successful connection between peers. Thus, passed the newId as an error message, and let the front-end handle the connection.
+
 *Peer will automatically create a new connection for type OFFER from server with a peerId in payload.connectionId*
 ASSUMPTION: all browsers are using Chrome. Have not tested what problems there are with other browsers.
 
@@ -40,6 +42,8 @@ ASSUMPTION: all browsers are using Chrome. Have not tested what problems there a
 }
 
 !!Current Problem: onnegotiationneeded (in peerjs/dist/peer.js) is not getting triggered to form the connection. Thought setting browser to Chrome was enough, but apperently not.
+
+
 
 Todo:
 X 1) Figure out how the sever can send messages to clients → clients can recognize specific keyword to recognize new connections

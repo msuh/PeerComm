@@ -15,6 +15,9 @@ var peer = new Peer({
     var copy = Array.prototype.slice.call(arguments).join(' ');
     $('.log').append(copy + '<br>');
 
+    if(arguments[0]=="Invalid server message"){
+        // console.log(JSON.parse(arguments[1]));
+    }
     if(arguments.length > 2){
       try{
           if(arguments[2].type === 'REQUEST'){
@@ -36,6 +39,7 @@ var clientId = "";
 // Show this peer's ID.
 peer.on('open', function(id){
   console.log("id: ",id);
+  console.log("peer.options: ",peer.options);
   $('#pid').text(id);
   clientId = id;
 });

@@ -23,7 +23,8 @@ var Server = function() {
         //  Set the environment variables we need.
         self.ipaddress = "127.0.0.1";
         self.port      = 9000;
-        self.connectionStatus = {};
+        self.connectionStatus = {}; //url to list of peers
+        self.leaders = {};
 
         console.log("IP address: ",self.ipaddress,":",self.port);
     };
@@ -96,6 +97,7 @@ var Server = function() {
 
       //id peer with new connection
   		peerServer.on("connection",function(newId){
+
         //peerjs-server/lib/index.js
         var peers = peerServer._clients['peerjs'];
         for(var id in peers){
@@ -115,7 +117,8 @@ var Server = function() {
           }
           console.log(id);
           // console.log("socket - ",peers[id]['socket']);
-
+          // peers[id].socket.send(peers[id].socket);
+          // continue;
 
 
           ////////////////////////////////////////////////////////
