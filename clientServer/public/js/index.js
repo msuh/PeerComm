@@ -6,6 +6,7 @@ var peer = new Peer({
 
   debug: 3, // Set highest debug level (log everything!).
   host: "localhost",
+  path: "/peerServer",
   port: 9000,
 
   // Set a logging function:
@@ -23,7 +24,7 @@ var peer = new Peer({
           if(arguments[2].type === 'REQUEST'){
             connectToPeer(arguments[2].src);
           }else if(arguments[2].type === 'LEADER'){
-            //code for making this peer a leader
+            initiateLeader();
           }
       }catch(e){
         console.log(arguments);
@@ -36,12 +37,16 @@ var peer = new Peer({
 var connectedPeers = {};
 var clientId = "";
 
+
+
 // Show this peer's ID.
 peer.on('open', function(id){
   console.log("id: ",id);
-  console.log("peer.options: ",peer.options);
+  console.log("peer.options: ",peer);
   $('#pid').text(id);
   clientId = id;
+  contactServer('url', JSON.stringify({type:'URL',url:window.location.href, id:id}));
+  // contactServer('url', {type:'URL',url:window.location.href, id:id});
 });
 
 // Await connections from others
@@ -51,7 +56,25 @@ peer.on('error', function(err) {
   console.log(err);
 })
 
+peer.on('url', function(url){
+  console.log("peer getting url");
+});
+
 ////////////////// helper functions //////////////////
+function initiateLeader(){
+  console.log("I AM A LEADER!");
+}
+function contactServer(type, message){
+  //message should be a valid stringified JSON object
+  //._socket is the webServerSocket peer is connected to
+  peer.socket._socket.send(message);
+
+  //** Native WebSocket DOES NOT have a function called emit
+  //unlike a lot of socket libraries (socket.io)
+  //Only available in send(), which is automatically typed to 'message'
+  // peer.socket._socket.emit(type, message);
+};
+
 function connectToPeer(requestedPeer){
   if (!connectedPeers[requestedPeer]) {
     // Create a connection
@@ -90,20 +113,7 @@ $(document).ready(function() {
   $('#connect').click(function() {
     var requestedPeer = $('#rid').val();
     connectToPeer(requestedPeer);
-    // if (!connectedPeers[requestedPeer]) {
-      // Create a connection
-      connectToPeer(requestedPeer);
-    //   var c = peer.connect(requestedPeer, {
-    //     label: 'data',
-    //     serialization: 'none',
-    //     metadata: {message: 'new connection!'}
-    //   });
-    //   c.on('open', function() {
-    //     connect(c);
-    //   });
-    //   c.on('error', function(err) { alert(err); });
-    // }
-    // connectedPeers[requestedPeer] = 1;
+
   });
 
   // Close a connection.

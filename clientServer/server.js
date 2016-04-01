@@ -1,7 +1,9 @@
 var http = require('http');
 var express = require('express');
 var path = require('path');
-var ExpressPeerServer = require('peer').ExpressPeerServer;
+// var ExpressPeerServer = require('peer').ExpressPeerServer;
+var ExpressPeerServer = require('./lib/peerServer').ExpressPeerServer; //contains my modified code
+// var EventEmitter = require('eventemitter3');
 // var bodyParser = require('body-parser');
 // var cookieParser = require('cookie-parser');
 // var session = require('express-session');
@@ -23,8 +25,6 @@ var Server = function() {
         //  Set the environment variables we need.
         self.ipaddress = "127.0.0.1";
         self.port      = 9000;
-        self.connectionStatus = {}; //url to list of peers
-        self.leaders = {};
 
         console.log("IP address: ",self.ipaddress,":",self.port);
     };
@@ -68,11 +68,13 @@ var Server = function() {
      *  Create the routing table entries + handlers for the application.
      */
     self.createRoutes = function() {
-        self.app.use(bodyParser.json());
-        self.app.use(bodyParser.urlencoded({extended: true}));
-        self.app.use(cookieParser());
+        // self.app.use(bodyParser.json());
+        // self.app.use(bodyParser.urlencoded({extended: true}));
+        // self.app.use(cookieParser());
         var routes = require('./routes/index');
         self.app.use('/', routes);
+
+
     };
 
 
@@ -81,7 +83,7 @@ var Server = function() {
      *  the handlers.
      */
     self.initializeServer = function() {
-        // self.createRoutes();
+        self.createRoutes();
 
         self.server = http.createServer(self.app);
         self.initializePeer();
@@ -93,68 +95,40 @@ var Server = function() {
   		}
 
   		var peerServer = ExpressPeerServer(self.server, options);
-  		self.app.use('/', peerServer);
+  		self.app.use('/peerServer', peerServer);
 
       //id peer with new connection
   		peerServer.on("connection",function(newId){
 
+
         //peerjs-server/lib/index.js
         var peers = peerServer._clients['peerjs'];
-        for(var id in peers){
-          /// Structure of peerServer._clients
-          // { peerjs:
-          //  { '29xdofpb34k7qfr0':
-          //     { token: '4wr56k5alftmfxtywu9ykfbt9',
-          //       ip: '127.0.0.1',
-          //       res: [Object],
-          //       socket: [Object] },
-          //    nhvfmj5khk9be290:
-          //     { token: 'k5if1yd15zus76cudenv4e7b9',
-          //       ip: '127.0.0.1',
-          //       socket: [Object] } } }
-          if(id === newId){
+
+        var connectedUrl = peerServer.idToUrl[newId];
+        for(var connId in peerServer.urlToPeers[connectedUrl]){
+          if(connId === newId){
             continue;
           }
-          console.log(id);
-          // console.log("socket - ",peers[id]['socket']);
-          // peers[id].socket.send(peers[id].socket);
-          // continue;
-
 
           ////////////////////////////////////////////////////////
-          /////////////// attempting to use OFFER ////////////////
-          //-- fails at passing 'negotiationneeded'
+          // because the official way to make peers connect offered by
+          // the traditional server does not work, hack it by making
+          // the logFunction take the message and connect
+
           // var serverMessage = {
           //   src : newId,
-          //   type: 'OFFER',
-          //   payload: {
-          //     type: 'data',
-          //     // connectionId: newId, --> automatically set by DataConnection()
-          //     label: 'data',
-          //     serialization: 'none',
-          //     reliable: false,
-          //     browser: 'Chrome' //taken from l.262 in peerjs/dist/peer.js this._peerBrowser = payload.browser;
+          //   type : 'REQUEST',
+          //   payload : {
           //   }
           // }
-
-          ////////////////////////////////////////////////////////
-          //because the official way to make peers connect offered by
-          //the traditional server does not work, hack it by making
-          //the logFunction take the message and connect
-
-          var serverMessage = {
-            src : newId,
-            type : 'REQUEST',
-            payload : {
-            }
-          }
+          var serverMessage = peerServer.formServerMessage('REQUEST',newId,{});
 
           try{
             //peerjs defined sockets
-            if(peers[id].socket){
-                peers[id].socket.send(JSON.stringify(serverMessage));
-            }else if(peers[id].res){
-              peers[id].res.write(JSON.stringify(serverMessage));
+            if(peers[connId].socket){
+                peers[connId].socket.send(JSON.stringify(serverMessage));
+            }else if(peers[connId].res){
+              peers[connId].res.write(JSON.stringify(serverMessage));
             }else{
               //peer with id disconnected during the loop?
               console.log("Peer dead");
@@ -163,17 +137,13 @@ var Server = function() {
             // This happens when a peer disconnects without closing connections and
             // the associated WebSocket has not closed.
             // Tell other side to stop trying.
-            this._removePeer('peerjs', id);
+            console.log(e);
           }
 
         }
 
-
   			// console.log(peerServer._outstanding);
 
-
-  			//this seems to be the indicator of the domain..?
-  			// console.log(id.domain);
   		});
 
   		self.server.on('disconnect', function(id) {
