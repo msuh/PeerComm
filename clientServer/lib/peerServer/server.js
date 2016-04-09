@@ -19,7 +19,7 @@ app._initializeWSS = function(server) {
 
   //MS - my inserted code
   self.urlToLeader = {};
-  self.urlToPeers = {}; //url to list of peers
+  self.urlToPeers = {}; //url to list of peerIds
   self.idToUrl = {};
 
   // Create WebSocket server as well.
@@ -98,8 +98,8 @@ app._configureWS = function(socket, key, id, token) {
           dst: message.dst,
           payload: message.payload
         });
-      } else if(message.type === 'URL'){ //MS - my inserted code
-        console.log(message.url);
+      } else if(message.type === 'URL'){ //MS - my inserted code || when clients first connect
+        console.log("server.js l.102, URL - ", message.url);
         self.idToUrl[message.id] = message.url;
         //if first connection on this url
         if(!self.urlToPeers[message.url]){
@@ -112,8 +112,9 @@ app._configureWS = function(socket, key, id, token) {
             // self._clients['peerjs'][message.id].socket.send(JSON.stringify(serverMessage));
         }else{
           self.urlToPeers[message.url].push(message.id);
-        }
-        console.log(self.urlToPeers[message.url]);
+          var leader = self.urlToLeader[message.url];
+          self.connectPeer(leader, message.id);
+        } //REQUEST
 
       } else {
         util.prettyError('Message unrecognized');
@@ -132,6 +133,26 @@ app.assignLeader = function(id){
   var serverMessage = this.formServerMessage('LEADER',id);
   this._clients['peerjs'][id].socket.send(JSON.stringify(serverMessage));
 }
+
+app.connectPeer = function(id1, id2){
+  var peer1 = this._clients['peerjs'][id1];
+  var mess = this.formServerMessage('REQUEST',id2,{});
+  try{
+    //peerjs defined sockets
+    if(peer1.socket){
+        peer1.socket.send(JSON.stringify(mess));
+    }else if(peer1.res){
+      peer1.res.write(JSON.stringify(mess));
+    }else{
+      //peer with id disconnected during the loop?
+      console.log("Peer dead");
+    }
+  }catch (e) { //taken from peerjs-sever/lib/server.js
+    console.log("server.js l.153 - ",e);
+  }
+
+}
+
 app.formServerMessage = function(type, src, payload){
   if(!payload){
     payload = {};
@@ -366,16 +387,24 @@ app._removePeer = function(key, id) {
     //MS -  my added code
     var url = this.idToUrl[id];
     delete this.idToUrl[id];
-    var pList = this.urlToPeers[url];
-    pList.splice(this.urlToPeers[url].indexOf(id),1);
-    console.log(pList);
+    var peersInUrl = this.urlToPeers[url];
+    peersInUrl.splice(this.urlToPeers[url].indexOf(id),1);
+    console.log(peersInUrl);
     if(this.urlToLeader[url]==id){
+      //MS - inserted code
       //disconnected peer is Leader.. reassign!
-      if(pList.length > 0){
+      if(peersInUrl.length > 0){
         //there are other peers connected
-        this.assignLeader(pList[0]);
-        this.urlToLeader[url] = pList[0];
+        var leader = peersInUrl[0];
+        this.assignLeader(leader);
+        this.urlToLeader[url] = leader;
         console.log("reassigning leader:",this.urlToLeader[url]);
+        for(var i in peersInUrl){
+          if(i == 0){
+            continue;
+          }
+          this.connectPeer(leader, peersInUrl[i]);
+        }
       }else{ //leader was the only one connected
         console.log("Leader was the only connected peer");
         delete this.urlToLeader[url];

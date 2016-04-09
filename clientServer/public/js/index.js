@@ -16,9 +16,11 @@ var peer = new Peer({
     var copy = Array.prototype.slice.call(arguments).join(' ');
     $('.log').append(copy + '<br>');
 
+    console.log("arguments: ",arguments);
     if(arguments[0]=="Invalid server message"){
         // console.log(JSON.parse(arguments[1]));
     }
+
     if(arguments.length > 2){
       try{
           if(arguments[2].type === 'REQUEST'){
@@ -90,7 +92,9 @@ function connectToPeer(requestedPeer){
   }
   connectedPeers[requestedPeer] = 1;
 }
+
 // Handle a connection object.
+// this method every time a message from a connection came
 function connect(c) {
   console.log("connect:",c);
   // Handle a chat connection.

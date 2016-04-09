@@ -17,7 +17,8 @@ To run the server:
 $node server.js
 
 To run clients:
-Open multiple index.html pages and try connecting using their IDs.
+Open multiple index.html pages, and all peers accessing the same url
+should automatically create a network of peerGroups
 
 
 -------------------------------

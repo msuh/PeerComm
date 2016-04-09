@@ -12,7 +12,7 @@ app.get('/', function (req, res) {
 
 app.get('/peerServer/peerId/:id', function(req, res) {
 	// res.render('index');
-	console.log(req.param);
+	// console.log(req.param);
 	// var body = req.body;
 	// console.log(body);
 });

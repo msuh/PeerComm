@@ -100,50 +100,32 @@ var Server = function() {
       //id peer with new connection
   		peerServer.on("connection",function(newId){
 
+        //// ** to connect to all peers in url
+        //// loop through each id connected to the url of newId
 
-        //peerjs-server/lib/index.js
-        var peers = peerServer._clients['peerjs'];
-
-        var connectedUrl = peerServer.idToUrl[newId];
-        for(var connId in peerServer.urlToPeers[connectedUrl]){
-          if(connId === newId){
-            continue;
-          }
-
-          ////////////////////////////////////////////////////////
-          // because the official way to make peers connect offered by
-          // the traditional server does not work, hack it by making
-          // the logFunction take the message and connect
-
-          // var serverMessage = {
-          //   src : newId,
-          //   type : 'REQUEST',
-          //   payload : {
-          //   }
-          // }
-          var serverMessage = peerServer.formServerMessage('REQUEST',newId,{});
-
-          try{
-            //peerjs defined sockets
-            if(peers[connId].socket){
-                peers[connId].socket.send(JSON.stringify(serverMessage));
-            }else if(peers[connId].res){
-              peers[connId].res.write(JSON.stringify(serverMessage));
-            }else{
-              //peer with id disconnected during the loop?
-              console.log("Peer dead");
-            }
-          }catch (e) { //taken from peerjs-sever/lib/server.js
-            // This happens when a peer disconnects without closing connections and
-            // the associated WebSocket has not closed.
-            // Tell other side to stop trying.
-            console.log(e);
-          }
-
-        }
+        // for(var connId in peers){
+        //   if(connId === newId){
+        //     continue;
+        //   }
+        //
+        //   var serverMessage = peerServer.formServerMessage('REQUEST',newId,{});
+        //
+        //   try{
+        //     //peerjs defined sockets
+        //     if(peers[connId].socket){
+        //         peers[connId].socket.send(JSON.stringify(serverMessage));
+        //     }else if(peers[connId].res){
+        //       peers[connId].res.write(JSON.stringify(serverMessage));
+        //     }else{
+        //       //peer with id disconnected during the loop?
+        //       console.log("Peer dead");
+        //     }
+        //   }catch (e) { //taken from peerjs-sever/lib/server.js
+        //     console.log(e);
+        //   }
+        // }
 
   			// console.log(peerServer._outstanding);
-
   		});
 
   		self.server.on('disconnect', function(id) {
