@@ -99,10 +99,10 @@ app._configureWS = function(socket, key, id, token) {
           payload: message.payload
         });
       } else if(message.type === 'URL'){ //MS - my inserted code || when clients first connect
-        console.log("server.js l.102, URL - ", message.url);
+        // console.log("server.js l.102, URL - ", message);
         self.idToUrl[message.id] = message.url;
         //if first connection on this url
-        if(!self.urlToPeers[message.url]){
+        if(!self.urlToPeers[message.url] || self.urlToPeers[message.url].length == 0){
           console.log("first connection to url:");
             self.urlToPeers[message.url] = [message.id];
             self.urlToLeader[message.url] = message.id;

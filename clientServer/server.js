@@ -98,38 +98,11 @@ var Server = function() {
   		self.app.use('/peerServer', peerServer);
 
       //id peer with new connection
-  		peerServer.on("connection",function(newId){
-
-        //// ** to connect to all peers in url
-        //// loop through each id connected to the url of newId
-
-        // for(var connId in peers){
-        //   if(connId === newId){
-        //     continue;
-        //   }
-        //
-        //   var serverMessage = peerServer.formServerMessage('REQUEST',newId,{});
-        //
-        //   try{
-        //     //peerjs defined sockets
-        //     if(peers[connId].socket){
-        //         peers[connId].socket.send(JSON.stringify(serverMessage));
-        //     }else if(peers[connId].res){
-        //       peers[connId].res.write(JSON.stringify(serverMessage));
-        //     }else{
-        //       //peer with id disconnected during the loop?
-        //       console.log("Peer dead");
-        //     }
-        //   }catch (e) { //taken from peerjs-sever/lib/server.js
-        //     console.log(e);
-        //   }
-        // }
-
-  			// console.log(peerServer._outstanding);
-  		});
-
-  		self.server.on('disconnect', function(id) {
-  		});
+  		// peerServer.on("connection",function(newId){
+  		// });
+      //
+  		// self.server.on('disconnect', function(id) {
+  		// });
     };
 
 

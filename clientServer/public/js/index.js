@@ -16,7 +16,7 @@ var peer = new Peer({
     var copy = Array.prototype.slice.call(arguments).join(' ');
     $('.log').append(copy + '<br>');
 
-    console.log("arguments: ",arguments);
+    // console.log("arguments: ",arguments);
     if(arguments[0]=="Invalid server message"){
         // console.log(JSON.parse(arguments[1]));
     }
@@ -44,11 +44,9 @@ var clientId = "";
 // Show this peer's ID.
 peer.on('open', function(id){
   console.log("id: ",id);
-  console.log("peer.options: ",peer);
   $('#pid').text(id);
   clientId = id;
   contactServer('url', JSON.stringify({type:'URL',url:window.location.href, id:id}));
-  // contactServer('url', {type:'URL',url:window.location.href, id:id});
 });
 
 // Await connections from others
@@ -96,11 +94,12 @@ function connectToPeer(requestedPeer){
 // Handle a connection object.
 // this method every time a message from a connection came
 function connect(c) {
-  console.log("connect:",c);
+  // console.log("connect:",c);
   // Handle a chat connection.
   if (c.label === 'data') {
     c.on('data', function(data) {
-      console.log("data: ",data);
+      $('#received .container').append('<p>'+c.peer+' :  ' + data + '</p>');
+      // console.log("data: ",data);
         c.on('close', function() {
           alert(c.peer + ' has left the chat.');
           console.log("close: ",close);
@@ -127,17 +126,14 @@ $(document).ready(function() {
     });
   });
 
-  // Send a message to all active connections.
   $('#send').submit(function(e) {
     e.preventDefault();
     // For each active connection, send the message.
     var msg = $('#text').val();
     eachActiveConnection(function(c, $c) {
-      console.log("c: ",c);
       if (c.label === 'data') {
         c.send(msg);
-        $c.find('.messages').append('<div><span class="you">You: </span>' + msg
-          + '</div>');
+        $('#received').append('<p class="you">You :  ' + msg + '</p>');
       }
     });
     $('#text').val('');
