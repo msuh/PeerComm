@@ -98,6 +98,7 @@ app._configureWS = function(socket, key, id, token) {
           dst: message.dst,
           payload: message.payload
         });
+        
       } else if(message.type === 'URL'){ //MS - my inserted code || when clients first connect
         // console.log("server.js l.102, URL - ", message);
         self.idToUrl[message.id] = message.url;
