@@ -4,7 +4,7 @@ Author: Michelle Suh
 email: michsuh1@gmail.com
 
 1. peerServer
-A node server that acts as a handshake center to connect the peers using this peer-to-peer real-time framework. This server is a modified version of the peerjs-server(https://github.com/peers/peerjs-server) offered by peerjs.com, to provide a more general-purpose peer-to-peer framework.
+A node server that acts as a handshake center to connect the peers using this peer-to-peer real-time framework. This server is a modified version of the peerjs-server (https://github.com/peers/peerjs-server) offered by peerjs.com, to provide a more general-purpose peer-to-peer framework.
 
   How to try the peer-to-peer communication using peerServer:
   1. start the node server
