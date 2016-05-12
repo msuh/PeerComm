@@ -389,7 +389,10 @@ app._removePeer = function(key, id) {
     var url = this.idToUrl[id];
     delete this.idToUrl[id];
     var peersInUrl = this.urlToPeers[url];
-    // console.log(peersInUrl);
+    console.log(peersInUrl);
+    if(peersInUrl == undefined){
+      return;
+    }
     peersInUrl.splice(this.urlToPeers[url].indexOf(id),1);
     // console.log(peersInUrl);
     if(this.urlToLeader[url]==id){

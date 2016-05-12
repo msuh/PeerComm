@@ -121,7 +121,7 @@ class peerComm{
             self.sendToPeersPrivate(data, self.connectedPeers, self.peer);
           }
             c.on('close', function() {
-              $('#received').append('<p>----'+c.peer+' disconnected -----</p>');
+              // $('#received').append('<p>----'+c.peer+' disconnected -----</p>');
               // alert(c.peer + ' has left the chat.');
               delete self.connectedPeers[c.peer];
               return;
